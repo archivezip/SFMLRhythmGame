@@ -1,0 +1,4 @@
+[submodule "SFMLRhythmGame/vendor/spdlog"]
+	path = SFMLRhythmGame/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+
