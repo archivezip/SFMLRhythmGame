@@ -2,16 +2,17 @@
 
 #include "Log.h"
 #include "Conductor.h"
-
-const int W_WIDTH = 1280;
-const int W_HEIGHT = 720;
+#include "Settings.h"
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(W_WIDTH, W_HEIGHT), "SFML Rhythm Game");
+	//Create the logger
+    Log::Init();
 
-	Log::Init();
+	//Create the window
+    sf::RenderWindow window(sf::VideoMode(SCR_WIDTH, SCR_HEIGHT), "SFML Rhythm Game");
 
+	//Create the conductor which controls the game
     Conductor conductor;
 	
     while (window.isOpen())

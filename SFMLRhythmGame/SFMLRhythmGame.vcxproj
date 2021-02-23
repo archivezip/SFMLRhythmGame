@@ -166,13 +166,15 @@
     <ClCompile Include="src\Log.cpp" />
     <ClCompile Include="src\Conductor.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Note.cpp" />
+    <ClCompile Include="src\GameNote.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Note.h" />
     <ClInclude Include="include\Chart.h" />
     <ClInclude Include="include\Conductor.h" />
-    <ClInclude Include="include\Note.h" />
+    <ClInclude Include="include\GameNote.h" />
     <ClInclude Include="include\Log.h" />
+    <ClInclude Include="include\Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

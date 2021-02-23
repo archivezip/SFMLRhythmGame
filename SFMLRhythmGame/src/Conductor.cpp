@@ -1,15 +1,28 @@
 #include "Conductor.h"
 #include "Log.h"
+#include "Settings.h"
 
 Conductor::Conductor()
-{	
-	_chart = new Chart("assets/music/test.ogg", 0, "Mount Sinai", "SuicideBoys", 0,
-		132, 0);
-	_beatDuration = 60.f / _chart->_bpm;
+{
+	_chart = new Chart("assets/music/test.flac", 
+		0, "Envenomate", "MissKixx", 0, 160, 0);
+	_beatLength = 60.f / _chart->_bpm;
 
-	sf::Time time = _chart->getPlayingOffset();
-	_elapsedTime = time.asSeconds();
-	_chart->play();	
+	_chart->_music.play();
+
+	_trackTLPosition = static_cast<float>(SCR_HEIGHT) - _trackTLOffset;
+	
+	_trackLine[0] = sf::Vertex(sf::Vector2f(0, _trackTLPosition));
+	_trackLine[1] = sf::Vertex(sf::Vector2f(SCR_WIDTH, _trackTLPosition));
+
+}
+
+Conductor::~Conductor()
+{
+	for (GameNote* note : _notesOnScreen)
+	delete note;
+	
+	delete _chart;
 }
 
 void Conductor::update()
@@ -17,39 +30,36 @@ void Conductor::update()
 	if (!_ended)
 	{
 		//Get the songs current position in time
-		_currentPosition = (_chart->getPlayingOffset().asSeconds() - _elapsedTime) - _chart->_offset;
+		const float currentPosition = _chart->_music.getPlayingOffset().asSeconds() - _chart->_offset;
 
 		//Convert the songs current time into beats
-		_currentPosInBeats = _currentPosition / _beatDuration;
+		_musicPos = currentPosition / _beatLength;
 
 		//Spawn next note - if there is one and its time in the song has come
-		//If there is a next note and it's beat is less than the songs position on the track
-		if(_noteIndex < _chart->_beats.size() 
-			&& _chart->_beats[_noteIndex] < _currentPosInBeats + _beatsShownOnTrack)
+		//If there is another note to come and
+		//the note's beat is less than the music's current position in beats + the beats that are shown on the track 
+		//TODO: Look into the next note in the list to check if it is also on the same beat, if so spawn it this cycle.
+		if(_noteIndex < _chart->_notes.size() && 
+			_chart->_notes[_noteIndex]._beat < _musicPos + _trackBeatCount)
 		{
-			switch (_chart->_types[_noteIndex])
-			{
-				case 0:
-				{
-					Note* note = new Note(_chart->_beats[_noteIndex], _chart->_types[_noteIndex]);
-					_notesOnScreen.push_back(note);
-					break;
-				}
-
-				default: break;
-			}
+			//spawn the note
+			GameNote* note = new GameNote(_chart->_notes[_noteIndex]._beat, _chart->_notes[_noteIndex]._type, _trackTLPosition);
+			_notesOnScreen.push_back(note);
+			//increase the note index to point to the next note
 			_noteIndex++;
 		}
 
-		for(Note* note : _notesOnScreen)
+		//update the notes that are on screens position
+		for(GameNote* note : _notesOnScreen)
 		{
-			note->update(_currentPosInBeats, _beatsShownOnTrack);
+			note->update(_musicPos, _trackBeatCount);
 		}
 	}
 }
 
 void Conductor::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	for (Note* note : _notesOnScreen) target.draw(*note);
+	for (GameNote* note : _notesOnScreen) target.draw(*note);
+	target.draw(_trackLine, 2, sf::Lines);
 }
 
