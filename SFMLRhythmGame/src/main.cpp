@@ -1,19 +1,18 @@
 #include <SFML/Graphics.hpp>
 
 #include "Log.h"
-#include "Note.h"
+#include "Conductor.h"
 
+const int W_WIDTH = 1280;
+const int W_HEIGHT = 720;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Rhythm Game");
-	
-    bool game = true; //game loop
+    sf::RenderWindow window(sf::VideoMode(W_WIDTH, W_HEIGHT), "SFML Rhythm Game");
 
-    Log::Init();
-	
-	
-    Note note1;
+	Log::Init();
+
+    Conductor conductor;
 	
     while (window.isOpen())
     {
@@ -24,13 +23,10 @@ int main()
                 window.close();
         }
 
-    	if(game)
-    	{
-            note1.move();
-    	}
-
+        conductor.update();
+    	
         window.clear();
-        window.draw(note1);
+        window.draw(conductor);
         window.display();
     }
 

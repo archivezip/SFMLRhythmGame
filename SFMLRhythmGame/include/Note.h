@@ -6,15 +6,18 @@
 class Note : public sf::RectangleShape
 {
 public:
-	Note();
-	void move();
+	Note(float b, int t);
+	void update(float currentPosInBeats, float beatsOnTrack);
 
+	// Linear interpolation
+	float lerp(float a, float b, float t);
 
-	sf::Vector2f fStartPos;
-	sf::Vector2f fEndPos;
+	float _beat;
+	int _type;
 
-	float fBeat;
-
+	float _xPosition;
+	float _yStart;
+	float _yEnd;
 
 	
 	//type
