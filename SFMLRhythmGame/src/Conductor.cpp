@@ -15,6 +15,8 @@ Conductor::Conductor()
 	_trackLine[0] = sf::Vertex(sf::Vector2f(0, _trackTLPosition));
 	_trackLine[1] = sf::Vertex(sf::Vector2f(SCR_WIDTH, _trackTLPosition));
 
+	_hitScore = _maxScore / _chart->_notes.size();
+	_nearScore = _hitScore / 2;
 }
 
 Conductor::~Conductor()
@@ -25,7 +27,7 @@ Conductor::~Conductor()
 	delete _chart;
 }
 
-void Conductor::update()
+void Conductor::update(int input)
 {
 	if (!_ended)
 	{
@@ -39,7 +41,7 @@ void Conductor::update()
 		//If there is another note to come and
 		//the note's beat is less than the music's current position in beats + the beats that are shown on the track 
 		//TODO: Look into the next note in the list to check if it is also on the same beat, if so spawn it this cycle.
-		if(_noteIndex < _chart->_notes.size() && 
+		if (_noteIndex < _chart->_notes.size() &&
 			_chart->_notes[_noteIndex]._beat < _musicPos + _trackBeatCount)
 		{
 			//spawn the note
@@ -49,12 +51,84 @@ void Conductor::update()
 			_noteIndex++;
 		}
 
+		//poll
+		if(input) inputted(input);
+		
+		if (!_notesOnScreen.empty())
+		{
+			GameNote currentNote = *_notesOnScreen[0];
+
+			float noteDuration = currentNote._beat - _musicPos;
+
+			if (noteDuration < -_nearOffset)
+			{
+				_notesOnScreen.erase(_notesOnScreen.begin());
+				_missCount++;
+				_playerCombo = 0;
+				LOG_INFO("Miss");
+			}
+		}
+
+		if (_playerCombo > _playerComboMax) _playerComboMax = _playerCombo;
+
 		//update the notes that are on screens position
-		for(GameNote* note : _notesOnScreen)
+		for (GameNote* note : _notesOnScreen)
 		{
 			note->update(_musicPos, _trackBeatCount);
 		}
+
+		//check if ended
+		if (_noteIndex >= _chart->_notes.size() && _notesOnScreen.empty())
+		{
+			_ended = true;
+			LOG_INFO("Chart Ended");
+			LOG_INFO("H: {0}  N:  {1}  M:  {2}", _hitCount, _nearCount, _missCount);
+		}
 	}
+}
+
+void Conductor::inputted(int type)
+{
+	float hit = _musicPos;
+
+	if(!_notesOnScreen.empty())
+	{
+		GameNote currentNote = *_notesOnScreen[0];
+
+		float hitTiming = currentNote._beat - hit;
+
+		bool playerHit = false;
+
+		if (currentNote._type == type) playerHit = true;
+
+		if(playerHit)
+		{
+			if(hitTiming <= _hitOffset && hitTiming >= -_hitOffset)
+			{
+				_notesOnScreen.erase(_notesOnScreen.begin());
+				_playerScore += _hitScore;
+				_hitCount++;
+				_playerCombo++;
+				LOG_INFO("Hit");
+			}
+			else if(hitTiming <= _nearOffset && hitTiming >= -_nearOffset)
+			{
+				_notesOnScreen.erase(_notesOnScreen.begin());
+				_playerScore += _nearScore;
+				_nearCount++;
+				_playerCombo++;
+				LOG_INFO("Near");
+			}
+		}
+		else if (hitTiming < _nearOffset)
+		{
+			_notesOnScreen.erase(_notesOnScreen.begin());
+			_missCount++;
+			_playerCombo = 0;
+			LOG_INFO("Miss");
+		}
+	}
+	
 }
 
 void Conductor::draw(sf::RenderTarget& target, sf::RenderStates states) const

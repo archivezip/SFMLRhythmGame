@@ -10,17 +10,35 @@ public:
 	Conductor();
 	~Conductor();
 
-	void update();
+	void update(int input);
+	
+	void inputted(int type);
 
 
 private:
+	
 	//chart data
-	Chart* _chart;
+	Chart* _chart; //i love you lilypad
 
 	//settings
 	float _trackBeatCount = 10.0f;	//How many beats are shown on the track
 	float _trackTLOffset = 100.f;	//The offset of the timing line from the bottom of the screen
 	float _trackTLPosition;			//The position of the timing line
+	
+	int _hitCount = 0;
+	int _nearCount = 0;
+	int _missCount = 0;
+
+	
+	float _playerScore = 0.f;
+	float _maxScore = 100;
+	float _hitScore = 0.f;
+	float _nearScore = 0.f;
+	
+	int _playerCombo = 0;
+	int _playerComboMax = 0;
+
+
 
 	//loop control
 	bool _ended = false;
@@ -35,6 +53,8 @@ private:
 	//Timing System Variables
 	float _musicPos = 0.f;		//music current position in beats
 	float _beatLength = 0.f;	//length of each beat in the music
+	float _nearOffset = 0.25f;	//Time window for a near
+	float _hitOffset = 0.15f;		//Time window for a hit
 	
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };

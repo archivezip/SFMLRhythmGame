@@ -9,22 +9,27 @@ GameNote::GameNote(float beat, int type, float yEnd) : Note(beat, type), _yEndPo
 	{
 		case 1:{
 			_xPos = 550;
+			setFillColor(sf::Color::Red);
 			break;
 		}
 		case 2:{
 			_xPos = 610;
+			setFillColor(sf::Color::White);
 			break;
 		}
 		case 3:{
 			_xPos = 670;
+			setFillColor(sf::Color::White);
 			break;
 		}
 		case 4:{
 			_xPos = 730;
+			setFillColor(sf::Color::Red);
 			break;
 		}
 		default:{
 			_xPos = 100;
+			setFillColor(sf::Color::Green);
 			LOG_ERROR("Note Type Unknown!! T: {0}", _type);
 			break;
 		}
@@ -32,7 +37,6 @@ GameNote::GameNote(float beat, int type, float yEnd) : Note(beat, type), _yEndPo
 	
 	setSize(sf::Vector2f(60.f, 15.f));
 	setPosition(_xPos, 0);
-	setFillColor(sf::Color::Red);
 	setOrigin(30.f, 7.5f);
 
 	LOG_INFO("Note Spawned: B: {0}, T: {1}", _beat, _type);
