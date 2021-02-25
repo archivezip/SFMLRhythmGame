@@ -12,16 +12,16 @@ public:
 
 	void update(int input);
 	
-	void inputted(int type);
+	void input(int playerInput);
 
 
 private:
 	
 	//chart data
-	Chart* _chart; //i love you lilypad
+	Chart* _chart;
 
 	//settings
-	float _trackBeatCount = 10.0f;	//How many beats are shown on the track
+	float _trackBeatCount = 5.0f;	//How many beats are shown on the track
 	float _trackTLOffset = 100.f;	//The offset of the timing line from the bottom of the screen
 	float _trackTLPosition;			//The position of the timing line
 	
@@ -30,10 +30,12 @@ private:
 	int _missCount = 0;
 
 	
-	float _playerScore = 0.f;
+
 	float _maxScore = 100;
 	float _hitScore = 0.f;
 	float _nearScore = 0.f;
+
+	float _playerScore = 0.f;
 	
 	int _playerCombo = 0;
 	int _playerComboMax = 0;

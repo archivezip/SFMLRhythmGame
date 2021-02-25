@@ -27,7 +27,7 @@ Conductor::~Conductor()
 	delete _chart;
 }
 
-void Conductor::update(int input)
+void Conductor::update(int playerInput)
 {
 	if (!_ended)
 	{
@@ -52,7 +52,7 @@ void Conductor::update(int input)
 		}
 
 		//poll
-		if(input) inputted(input);
+		if(playerInput) input(playerInput);
 		
 		if (!_notesOnScreen.empty())
 		{
@@ -87,10 +87,12 @@ void Conductor::update(int input)
 	}
 }
 
-void Conductor::inputted(int type)
-{
+void Conductor::input(int type)
+{	
 	float hit = _musicPos;
 
+	LOG_INFO(hit);
+	
 	if(!_notesOnScreen.empty())
 	{
 		GameNote currentNote = *_notesOnScreen[0];

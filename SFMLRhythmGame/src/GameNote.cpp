@@ -35,11 +35,11 @@ GameNote::GameNote(float beat, int type, float yEnd) : Note(beat, type), _yEndPo
 		}
 	}
 	
-	setSize(sf::Vector2f(60.f, 15.f));
+	setSize(sf::Vector2f(50.f, 10.0f));
 	setPosition(_xPos, 0);
-	setOrigin(30.f, 7.5f);
+	setOrigin(25.f, 5.f);
 
-	LOG_INFO("Note Spawned: B: {0}, T: {1}", _beat, _type);
+	//LOG_INFO("Note Spawned: B: {0}, T: {1}", _beat, _type);
 }
 
 void GameNote::update(float currentPosInBeats, float beatsOnTrack)

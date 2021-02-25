@@ -14,12 +14,9 @@ public:
 
 
 private:
+	
 	// Linear interpolation
 	float lerp(float a, float b, float t);
-	
-	//type
-	//Beat
-	//spawn pos
-	//end pos
+
 	
 };
