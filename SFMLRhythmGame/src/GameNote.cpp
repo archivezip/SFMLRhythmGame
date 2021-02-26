@@ -3,9 +3,9 @@
 #include "Settings.h"
 
 
-GameNote::GameNote(float beat, int type, float yEnd) : Note(beat, type), _yEndPos(yEnd)
+GameNote::GameNote(float beat, int type, float length, float yEnd) : Note(beat, type, length), _yEndPos(yEnd)
 {	
-	switch (_type)
+	switch (_lane)
 	{
 		case 1:{
 			_xPos = 550;
@@ -30,7 +30,7 @@ GameNote::GameNote(float beat, int type, float yEnd) : Note(beat, type), _yEndPo
 		default:{
 			_xPos = 100;
 			setFillColor(sf::Color::Green);
-			LOG_ERROR("Note Type Unknown!! T: {0}", _type);
+			LOG_ERROR("Note Type Unknown!! T: {0}", _lane);
 			break;
 		}
 	}
@@ -39,7 +39,7 @@ GameNote::GameNote(float beat, int type, float yEnd) : Note(beat, type), _yEndPo
 	setPosition(_xPos, 0);
 	setOrigin(25.f, 5.f);
 
-	//LOG_INFO("Note Spawned: B: {0}, T: {1}", _beat, _type);
+	//LOG_INFO("Note Spawned: B: {0}, T: {1}", _beat, _lane);
 }
 
 void GameNote::update(float currentPosInBeats, float beatsOnTrack)

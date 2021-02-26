@@ -10,67 +10,71 @@ int main()
     Log::Init();
 
 	//Create the window
-    sf::RenderWindow window(sf::VideoMode(SCR_WIDTH, SCR_HEIGHT), "SFML Rhythm Game");
+    sf::RenderWindow _window(sf::VideoMode(SCR_WIDTH, SCR_HEIGHT), "SFML Rhythm Game");
 
     //Create the conductor which controls the game
-    Conductor conductor;
+    Conductor _conductor;
 
-    int playerInput = 0;
-	
+    int _laneControlInput = 0;
+    int _laneControlIndex = 1;
 	
 	//While the SFML window is open
-    while (window.isOpen())
+    while (_window.isOpen())
     {
         sf::Event event;
         // while there are pending events...
-        while (window.pollEvent(event))
+        while (_window.pollEvent(event))
         {
             // check the type of the event...
             switch (event.type)
             {
                 // window closed event
             case sf::Event::Closed:
-                window.close();
+                _window.close();
                 break;
 
                 // key pressed event
             case sf::Event::KeyPressed:
-                // what key was pressed
-                switch (event.key.code)
-                {
-                case sf::Keyboard::Escape: { 
-                    window.close();
-                    break;
-					}
-                case sf::Keyboard::D: {
-                    playerInput = 1;
-                    break;
-					}
-                case sf::Keyboard::F: {
-                    playerInput = 2;
-                    break;
-					}
-                case sf::Keyboard::J: {
-                    playerInput = 3;
-                    break;
-					}
-                case sf::Keyboard::K: {
-                    playerInput = 4;
-                    break;
-					}
-                }
+
+                if (!_conductor._chartStart) _laneControlInput = event.key.code;
+                if(_conductor._chartStart && !_conductor._chartEnded) _conductor.input(event.key.code);
+            	if(event.key.code == sf::Keyboard::Escape) _window.close();
+            	
+                break;
                 // we don't process other types of events
             default:
                 break;
             }
         }
 
-        conductor.update(playerInput);
-        playerInput = 0;
-    	
-        window.clear();
-        window.draw(conductor);
-        window.display();
+        if(!_conductor._chartStart)
+        {
+            if (_laneControlIndex <= _conductor._chartLanes)
+            {
+                LOG_WARN("Please input the key for lane {0} of {1}", _laneControlIndex, _conductor._chartLanes);
+                if (_laneControlInput)
+                {
+                    _conductor.setLaneKey(_laneControlInput);
+                    _laneControlIndex++;
+                }
+            }   
+            else
+            {
+                _conductor._chartStart = true;
+            }
+        }
+
+
+    	//Update
+        _conductor.update();
+
+        //Variable Reset
+        _laneControlInput = 0;
+
+    	//Drawing
+        _window.clear();
+        _window.draw(_conductor);
+        _window.display();
     }
 
     return 0;

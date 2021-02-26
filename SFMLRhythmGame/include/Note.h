@@ -4,8 +4,10 @@
 class Note : public sf::RectangleShape 
 {
 public:
-	Note(float beat, int type) : _beat(beat), _type(type) {}
-	float _beat;
-	int _type;
+	Note(float beat, int lane, float length) : _beat(beat), _lane(lane), _length(length){}
+
+	float	_beat;
+	int		_lane;
+	float	_length;
 };
 

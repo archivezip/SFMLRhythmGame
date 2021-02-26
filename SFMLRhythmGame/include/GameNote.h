@@ -5,7 +5,7 @@
 class GameNote : public Note
 {
 public:
-	GameNote(float beat, int type, float yEnd);
+	GameNote(float beat, int lane, float length, float yEnd);
 	void update(float currentPosInBeats, float beatsOnTrack);
 
 	float _xPos = 0.f;

@@ -18,7 +18,7 @@ void Log::Init()
 	fileLog.reset();	//!< clear up the shared pointed as it is no longer used
 	log->sinks()[0]->set_level(spdlog::level::trace); //!< setting the level the logger
 	log->sinks()[1]->set_level(spdlog::level::trace); //!< setting the level the logger
-	log->sinks()[0]->set_pattern("%^[%T.%e] %n: [%l]: %v %$"); //!< 24hour + ms clock with the name of the log and log output along with its type
+	log->sinks()[0]->set_pattern("%^[%T.%e] %l: %v %$"); //!< 24hour + ms clock with the name of the log and log output along with its type
 	log->sinks()[1]->set_pattern("%+"); //!< spdlog default format
 	log->info(">>>>>----=== New Application ===----<<<<<");	//!< Print out a header to signal a new run of the application
 }
