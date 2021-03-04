@@ -8,23 +8,25 @@ class Conductor : public sf::Drawable
 
 public:
 	Conductor();
-	~Conductor();
+	~Conductor() override;
 
 	void update();
 	
-	void input(int playerInput);
+	void input(int input);
 
-	void setLaneKey(int playerInput);
+	void setLaneKey(int lane);
+	int getLaneCount();
 
+	
 	//loop control
 	bool _chartEnded = false;
 	bool _chartPlaying = false;
 	bool _chartStart = false;
 
-	int _chartLanes = 0;
-
 
 private:
+
+	int convertLaneToInput(int lane);
 	
 	//chart data
 	Chart* _chart;
@@ -38,7 +40,7 @@ private:
 	float _hitOffset = 0.15f;		//Time window for a hit
 
 	//settings
-	float _trackBeatsShown = 5.0f;	//How many beats are shown on the track
+	float _trackBeatsShown = 4.0f;	//How many beats are shown on the track
 	float _trackTLOffset = 100.f;	//The offset of the timing line from the bottom of the screen
 	float _trackTLPosition;			//The position of the timing line
 

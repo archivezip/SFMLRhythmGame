@@ -15,7 +15,7 @@ int main()
     //Create the conductor which controls the game
     Conductor _conductor;
 
-    int _laneControlInput = 0;
+    int _laneControlInput = 999;
     int _laneControlIndex = 1;
 	
 	//While the SFML window is open
@@ -35,10 +35,11 @@ int main()
 
                 // key pressed event
             case sf::Event::KeyPressed:
+                if (event.key.code == sf::Keyboard::Escape) _window.close();
 
                 if (!_conductor._chartStart) _laneControlInput = event.key.code;
-                if(_conductor._chartStart && !_conductor._chartEnded) _conductor.input(event.key.code);
-            	if(event.key.code == sf::Keyboard::Escape) _window.close();
+                else if (!_conductor._chartEnded) _conductor.input(event.key.code);
+
             	
                 break;
                 // we don't process other types of events
@@ -49,10 +50,10 @@ int main()
 
         if(!_conductor._chartStart)
         {
-            if (_laneControlIndex <= _conductor._chartLanes)
+            if (_laneControlIndex <= _conductor.getLaneCount())
             {
-                LOG_WARN("Please input the key for lane {0} of {1}", _laneControlIndex, _conductor._chartLanes);
-                if (_laneControlInput)
+                LOG_WARN("Lane {0} of {1}", _laneControlIndex, _conductor.getLaneCount());
+                if (_laneControlInput != 999)
                 {
                     _conductor.setLaneKey(_laneControlInput);
                     _laneControlIndex++;
@@ -62,14 +63,12 @@ int main()
             {
                 _conductor._chartStart = true;
             }
+            _laneControlInput = 999;
         }
 
 
     	//Update
         _conductor.update();
-
-        //Variable Reset
-        _laneControlInput = 0;
 
     	//Drawing
         _window.clear();

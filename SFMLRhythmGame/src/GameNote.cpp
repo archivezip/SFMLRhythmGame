@@ -2,8 +2,10 @@
 #include "Log.h"
 #include "Settings.h"
 
+//TODO: Make lane spawning positions changeable/based upon resolution
+//TODO: Change yEnd to be a globally configured setting
 
-GameNote::GameNote(float beat, int type, float length, float yEnd) : Note(beat, type, length), _yEndPos(yEnd)
+GameNote::GameNote(float beat, int lane, float length, int input, float yEnd) : Note(beat, lane, length), _input(input),  _yEndPos(yEnd)
 {	
 	switch (_lane)
 	{
@@ -36,10 +38,8 @@ GameNote::GameNote(float beat, int type, float length, float yEnd) : Note(beat, 
 	}
 	
 	setSize(sf::Vector2f(50.f, 10.0f));
-	setPosition(_xPos, 0);
-	setOrigin(25.f, 5.f);
-
-	//LOG_INFO("Note Spawned: B: {0}, T: {1}", _beat, _lane);
+	setOrigin(getSize().x / 2, getSize().y / 2);
+	setPosition(_xPos, _yStartPos);
 }
 
 void GameNote::update(float currentPosInBeats, float beatsOnTrack)
@@ -49,7 +49,6 @@ void GameNote::update(float currentPosInBeats, float beatsOnTrack)
 	const auto lp = lerp(_yStartPos, _yEndPos, noteInterpolateRatio);
 	
 	setPosition(getPosition().x, lp);
-	//LOG_INFO("Note: {0}   |  yPos: {1}", _beat, getPosition().y);
 }
 
 float GameNote::lerp(float a, float b, float t)

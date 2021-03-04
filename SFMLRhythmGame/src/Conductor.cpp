@@ -14,15 +14,14 @@ Conductor::Conductor()
 	_trackLine[1] = sf::Vertex(sf::Vector2f(SCR_WIDTH, _trackTLPosition));
 
 	_hitScore = _maxScore / _chart->_notes.size();
-	_nearScore = _hitScore / 2;
-	_chartLanes = _chart->_lanes;
+	_nearScore = _hitScore / 2;	
 }
 
 Conductor::~Conductor()
 {
 	for (GameNote* note : _notesOnScreen)
-	delete note;
-	
+		delete note;
+
 	delete _chart;
 }
 
@@ -34,7 +33,7 @@ void Conductor::update()
 		//Do nothing
 	}
 	//If the chart has started but the chart is not playing
-	else if(_chartStart && !_chartPlaying)
+	else if(_chartStart && !_chartPlaying && !_chartEnded)
 	{
 		//start the chart by setting it to play
 		_chart->_music.play();
@@ -59,8 +58,10 @@ void Conductor::update()
 		while(_noteIndex < _chart->_notes.size() &&
 			trackBeatSpawnPos > _chart->_notes[_noteIndex]._beat)
 		{	//Spawn that note
-			GameNote* note = new GameNote(_chart->_notes[_noteIndex]._beat, _chart->_notes[_noteIndex]._lane,
-				_chart->_notes[_noteIndex]._length, _trackTLPosition);
+			GameNote* note = new GameNote(
+				_chart->_notes[_noteIndex]._beat, _chart->_notes[_noteIndex]._lane,		//beat, lane
+				_chart->_notes[_noteIndex]._length, convertLaneToInput(_chart->_notes[_noteIndex]._lane), //length, input
+				_trackTLPosition);	//track pos / yEnd
 			//Add the not to the notes that are currently shown on the screen
 			_notesOnScreen.push_back(note);
 			//increase the note index to point to the next note in the chart
@@ -69,33 +70,31 @@ void Conductor::update()
 
 		//DELETE NOTES - THAT THE PLAYER HAS MISSED
 		//If there are notes on the screen
-		if (!_notesOnScreen.empty())
+
+
+		//Has player missed note? 
+		//is the music position greater than the beat of the note + near offset?  
+		while (!_notesOnScreen.empty() && _musicPosBeats > _notesOnScreen.front()->_beat + _nearOffset)
 		{
-			//While the music position is greater than the beat of the note next to come
-			//(The player has not hit the note, and the note is now behind the current point in the song)
-			//(Is a while so that if there are more than one notes on the same beat, they will be deleted at the same time)
-			while(_musicPosBeats > _notesOnScreen.front()->_beat)
+			//Get the note 
+			GameNote currentNote = *_notesOnScreen.front();
+		
+			//Check how long its been since the player was supposed to hit the note
+			float noteDuration = currentNote._beat - _musicPosBeats;
+		
+			//if that duration has fallen out of the near threshold
+			if (noteDuration < -_nearOffset)
 			{
-				//Get the note 
-				GameNote currentNote = *_notesOnScreen.front();
-
-				//Check how long its been since the player was supposed to hit the note
-				float noteDuration = currentNote._beat - _musicPosBeats;
-
-				//if that duration has fallen out of the near threshold
-				if (noteDuration < -_nearOffset)
-				{
-					//delete the note
-					_notesOnScreen.erase(_notesOnScreen.begin());
-					//count it as a miss
-					_missCount++;
-					//reset the players combo
-					_playerCombo = 0;
-					LOG_INFO("Miss");
-				}
+				//delete the note
+				_notesOnScreen.erase(_notesOnScreen.begin());
+				//count it as a miss
+				_missCount++;
+				//reset the players combo
+				_playerCombo = 0;
+				LOG_INFO("Miss");
 			}
-			
 		}
+
 
 		//update player's best combo if the current combo is their best
 		if (_playerCombo > _playerComboMax) _playerComboMax = _playerCombo;
@@ -128,7 +127,7 @@ void Conductor::update()
 	}
 }
 
-void Conductor::input(int laneInput)
+void Conductor::input(int input)
 {
 	//TODO: fix input so that multiple notes on the same beat can be checked
 	//TODO: Allow multi input???
@@ -137,54 +136,98 @@ void Conductor::input(int laneInput)
 	//Get the position of the chart where the player pressed the key (in beats)
 	float hit = _musicPosBeats;
 
-	LOG_INFO(hit);
 	
 	if(!_notesOnScreen.empty())
-	{
+	{		
 		//Get the front note of the ones on the screen
-		GameNote currentNote = *_notesOnScreen.front();
+		GameNote frontNote = *_notesOnScreen.front();
+
+		//get the front note's beat
+		const float frontBeat = frontNote._beat;
 
 		//Find the time difference between the hit and the beat of the note
-		float hitTiming = currentNote._beat - hit;
+		const float frontTiming = frontBeat - hit;
+	
 
-		//Create a bool which will be true if the player hit the correct note 
-		bool playerHit = false;
+		bool beatChecked = false;
+		
+		int x = 0;
+		while(!beatChecked)	//while we haven't checked each note with the same beat as the front note
+		{		
+			//get the note's beat
+			const float noteBeat = _notesOnScreen[x]->_beat;
 
-		if (currentNote._lane == laneInput) playerHit = true;
+			//Find the time difference between the hit and the beat of the note
+			const float hitTiming = noteBeat - hit;
+			
+			//Create a bool which will be true if the player hits a note
+			bool playerHit = false;
+			
+			if (_notesOnScreen[x]->_input == input) playerHit = true;
+			else playerHit = false;
 
-		if(playerHit)
-		{
-			if(hitTiming <= _hitOffset && hitTiming >= -_hitOffset)
+			if (playerHit)
 			{
-				_notesOnScreen.erase(_notesOnScreen.begin());
-				_playerScore += _hitScore;
-				_hitCount++;
-				_playerCombo++;
-				LOG_INFO("Hit");
+				if (hitTiming <= _hitOffset && hitTiming >= -_hitOffset)
+				{
+					_notesOnScreen.erase(_notesOnScreen.begin() + x);
+					_playerScore += _hitScore;
+					_hitCount++;
+					_playerCombo++;
+					LOG_INFO("Perfect : {0} | {1}", hit, frontTiming);
+				}
+				else if (hitTiming <= _nearOffset && hitTiming >= -_nearOffset)
+				{
+					_notesOnScreen.erase(_notesOnScreen.begin() + x);
+					_playerScore += _nearScore;
+					_nearCount++;
+					_playerCombo++;
+					LOG_INFO("Near : {0} | {1}", hit, frontTiming);
+				}
 			}
-			else if(hitTiming <= _nearOffset && hitTiming >= -_nearOffset)
+	
+			x++;
+			try
 			{
-				_notesOnScreen.erase(_notesOnScreen.begin());
-				_playerScore += _nearScore;
-				_nearCount++;
-				_playerCombo++;
-				LOG_INFO("Near");
+				if (_notesOnScreen.at(x)->_beat != frontBeat)
+				{
+					beatChecked = true;
+				}
 			}
-		}
-		else if (hitTiming < _nearOffset)
-		{
-			_notesOnScreen.erase(_notesOnScreen.begin());
-			_missCount++;
-			_playerCombo = 0;
-			LOG_INFO("Miss");
+			catch (...)
+			{
+				beatChecked = true;
+			}
 		}
 	}
 	
 }
 
-void Conductor::setLaneKey(int playerInput)
+void Conductor::setLaneKey(int laneInput)
 {
-	_laneKeys.emplace_back(playerInput);
+	_laneKeys.emplace_back(laneInput);
+}
+
+int Conductor::getLaneCount()
+{
+	return _chart->_lanes;
+}
+
+int Conductor::convertLaneToInput(int lane)
+{
+	switch (lane)
+	{
+	case 1: return _laneKeys[0];
+	case 2: return _laneKeys[1];
+	case 3: return _laneKeys[2];
+	case 4: return _laneKeys[3];
+	case 5: return _laneKeys[4];
+	case 6: return _laneKeys[5];
+	case 7: return _laneKeys[6];
+	default: return 0;
+	}
+		 
+	
 }
 
 void Conductor::draw(sf::RenderTarget& target, sf::RenderStates states) const
