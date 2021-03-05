@@ -1,18 +1,12 @@
 #include "Conductor.h"
 #include "Log.h"
-#include "Settings.h"
 
 Conductor::Conductor()
 {
 	_chart = new Chart("assets/music/test.flac", 
 		0, "Envenomate", "MissKixx", 0, 160, 0, 4);
+
 	_beatLength = 60.f / _chart->_bpm;
-
-	_trackTLPosition = static_cast<float>(SCR_HEIGHT) - _trackTLOffset;
-	
-	_trackLine[0] = sf::Vertex(sf::Vector2f(0, _trackTLPosition));
-	_trackLine[1] = sf::Vertex(sf::Vector2f(SCR_WIDTH, _trackTLPosition));
-
 	_hitScore = _maxScore / _chart->_notes.size();
 	_nearScore = _hitScore / 2;	
 }
@@ -49,7 +43,7 @@ void Conductor::update()
 		//Convert the current playing position into beats
 		_musicPosBeats = musicPos / _beatLength;		
 		//Calculate the track's beat spawning position
-		const float trackBeatSpawnPos = _musicPosBeats + _trackBeatsShown;
+		const float trackBeatSpawnPos = _musicPosBeats + _track._timingLinePos;
 
 		
 		//SPAWN NOTES - CREATE NOTE OBJECTS IF THERE ARE ANY THAT NEED TO SPAWN
@@ -61,7 +55,7 @@ void Conductor::update()
 			GameNote* note = new GameNote(
 				_chart->_notes[_noteIndex]._beat, _chart->_notes[_noteIndex]._lane,		//beat, lane
 				_chart->_notes[_noteIndex]._length, convertLaneToInput(_chart->_notes[_noteIndex]._lane), //length, input
-				_trackTLPosition);	//track pos / yEnd
+				_track._timingLinePos);	//track pos / yEnd
 			//Add the not to the notes that are currently shown on the screen
 			_notesOnScreen.push_back(note);
 			//increase the note index to point to the next note in the chart
@@ -102,7 +96,7 @@ void Conductor::update()
 		//update the position of the notes that are on screen
 		for (GameNote* note : _notesOnScreen)
 		{
-			note->update(_musicPosBeats, _trackBeatsShown);
+			note->update(_musicPosBeats, _track._beatsShown);
 		}
 
 		//if there are more notes in the chart to spawn
@@ -112,7 +106,7 @@ void Conductor::update()
 			//chart has ended
 			_chartEnded = true;
 			//stop music
-			_chart->_music.stop();
+			//_chart->_music.stop();  only for now while chart isnt finished
 			//chart has stopped playing
 			_chartPlaying = false;
 
@@ -129,8 +123,6 @@ void Conductor::update()
 
 void Conductor::input(int input)
 {
-	//TODO: fix input so that multiple notes on the same beat can be checked
-	//TODO: Allow multi input???
 	//TODO: Add held notes
 
 	//Get the position of the chart where the player pressed the key (in beats)
@@ -208,7 +200,7 @@ void Conductor::setLaneKey(int laneInput)
 	_laneKeys.emplace_back(laneInput);
 }
 
-int Conductor::getLaneCount()
+int Conductor::getLaneCount() 
 {
 	return _chart->_lanes;
 }
@@ -226,13 +218,12 @@ int Conductor::convertLaneToInput(int lane)
 	case 7: return _laneKeys[6];
 	default: return 0;
 	}
-		 
-	
 }
 
 void Conductor::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	for (GameNote* note : _notesOnScreen) target.draw(*note);
-	target.draw(_trackLine, 2, sf::Lines);
+	target.draw(_track);
+
 }
 

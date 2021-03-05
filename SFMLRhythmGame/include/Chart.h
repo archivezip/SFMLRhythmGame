@@ -11,6 +11,23 @@ class Chart
 {
 public:
 
+	sf::Music _music;
+	std::vector<Note> _notes;
+
+	int _id;
+	String _filename;
+	String _title;
+	String _artist;
+
+	int _lanes;
+
+	int _rating;
+
+	float _bpm;
+	float _offset;
+
+
+	
 	Chart(String filename, int id, String title, String artist, int rating, float bpm, float offset, int lanes) :
 	_filename(filename),_id(id), _title(title), _artist(artist), _rating(rating), _bpm(bpm), _offset(offset), _lanes(lanes)
 	{
@@ -174,22 +191,5 @@ public:
 		_notes.emplace_back(Note(96,		2,	0));
 		
 	}
-
-	sf::Music _music;
-	std::vector<Note> _notes;
-
-	int _id;
-	String _filename;
-	String _title;
-	String _artist;
-
-	int _lanes;
-
-	int _rating;
-
-	float _bpm;
-	float _offset;
-
-
 };
 

@@ -167,6 +167,7 @@
     <ClCompile Include="src\Conductor.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\GameNote.cpp" />
+    <ClCompile Include="src\Track.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Note.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="include\GameNote.h" />
     <ClInclude Include="include\Log.h" />
     <ClInclude Include="include\Settings.h" />
+    <ClInclude Include="include\Track.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
